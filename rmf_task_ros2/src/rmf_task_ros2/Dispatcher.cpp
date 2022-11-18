@@ -479,16 +479,22 @@ public:
       }
 
       const auto& task_request_json = msg_json["request"];
-      std::string task_id =
-        task_request_json["category"].get<std::string>()
-        + ".dispatch-";
+      std::string task_id = msg.request_id;
+      bool id_was_empty = task_id.empty();
 
-      if (use_timestamp_for_task_id)
+      if (id_was_empty)
+      {
+        task_id = task_request_json["category"].get<std::string>()
+        + ".dispatch-";
+      }
+
+
+      if (use_timestamp_for_task_id && id_was_empty)
       {
         task_id += std::to_string(
           static_cast<int>(node->get_clock()->now().nanoseconds()/1e6));
       }
-      else
+      else if (id_was_empty)
       {
         task_id += std::to_string(task_counter++);
       }
@@ -506,7 +512,7 @@ public:
       auto response = rmf_task_msgs::build<ApiResponseMsg>()
         .type(ApiResponseMsg::TYPE_RESPONDING)
         .json_msg(response_json.dump())
-        .request_id(msg.request_id);
+        .request_id(task_id);
 
       api_memory.add(response);
       api_response->publish(response);
@@ -551,7 +557,7 @@ public:
 
     auto& priority = task_request["priority"];
     priority["type"] = "binary";
-    priority["value"] = submission.priority.value;
+    priority["value"] = submission.pauctioneerriority.value;
     task_request["category"] = category;
     task_request["description"] = legacy_task_types.at(category)(submission);
     task_request["labels"] = std::vector<std::string>({"legacy_request"});
