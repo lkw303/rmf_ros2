@@ -1,0 +1,35 @@
+# Build only merge request and default branch
+# and branches start with (develop).
+# save time for quick demo pushes
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH =~ /^develop/
+
+humble-nightly:
+  image:
+    name: registry.gitlab.com/rosi-ap/rosi-ap_infrastructure/rosiap_docker_images/ros:rmf-humble-nightly
+
+  cache:
+    key: ${CI_JOB_NAME}
+    paths:
+      - .ccache/
+
+  variables:
+    ISOLATION: "shell"
+    ROS_DISTRO: "humble"
+    CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
+    CC: "clang"
+    CXX: "clang++"
+    TARGET_CMAKE_ARGS: "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld"
+
+  script:
+    - apt-get update && apt-get install -y git
+    # TODO: remove this when uncrustify 0.72 is fixed https://github.com/uncrustify/uncrustify/issues/3191
+    # hack for uncrustify 0.72 problems
+    - curl -OL http://mirrors.kernel.org/ubuntu/pool/universe/u/uncrustify/uncrustify_0.69.0+dfsg1-1build1_amd64.deb && dpkg -i uncrustify_0.69.0+dfsg1-1build1_amd64.deb && apt install -f -y
+    - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci .industrial_ci -b master
+    - source /opt/rmf/install/setup.bash
+    - .industrial_ci/gitlab.sh
