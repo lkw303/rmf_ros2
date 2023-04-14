@@ -28,6 +28,8 @@
 
 #include <rmf_task_sequence/Task.hpp>
 
+#include <rmf_fleet_adapter/schemas/event_description__charge_battery.hpp>
+
 namespace rmf_fleet_adapter {
 namespace tasks {
 
@@ -165,6 +167,7 @@ struct ChargeBatteryEventDescription
 
 //==============================================================================
 void add_charge_battery(
+  agv::TaskDeserialization& deserialization,
   rmf_task::Activator& task_activator,
   const rmf_task_sequence::Phase::ConstActivatorPtr& phase_activator,
   rmf_task_sequence::Event::Initializer& event_initializer,
@@ -173,6 +176,22 @@ void add_charge_battery(
   using Bundle = rmf_task_sequence::events::Bundle;
   using Phase = rmf_task_sequence::phases::SimplePhase;
   using ChargeBattery = rmf_task::requests::ChargeBattery;
+
+  deserialization.add_schema(schemas::event_description__charge_battery);
+  auto validate_charge_battery = deserialization.make_validator_shared(
+    schemas::event_description__charge_battery);
+
+  auto deserialize_charge_battery =
+    [](const nlohmann::json& msg)-> agv::DeserializedEvent
+    {
+      std::shared_ptr<const rmf_task_sequence::Event::Description> desc =
+        std::make_shared<ChargeBatteryEventDescription>();
+      agv::DeserializedEvent deserialized = {desc, {}};
+      return deserialized;
+    };
+
+  deserialization.event->add(
+    "charge_battery", validate_charge_battery, deserialize_charge_battery);
 
   auto private_initializer =
     std::make_shared<rmf_task_sequence::Event::Initializer>();
