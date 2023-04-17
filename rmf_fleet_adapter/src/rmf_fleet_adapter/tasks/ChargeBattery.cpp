@@ -38,25 +38,43 @@ struct GoToChargerDescription
   : public rmf_task_sequence::events::Placeholder::Description
 {
   GoToChargerDescription()
-  : rmf_task_sequence::events::Placeholder::Description("Go to charger", "")
+  : rmf_task_sequence::events::Placeholder::Description("Go to charger", ""),
+    charger_waypoint(0),
+    has_charger_waypoint(false)
   {
     // Do nothing
   }
+
+  // Overload constructor with option to input waypoint
+  GoToChargerDescription(const std::size_t charger_waypoint)
+  : rmf_task_sequence::events::Placeholder::Description("Go to charger", ""),
+    charger_waypoint(charger_waypoint),
+    has_charger_waypoint(true)
+  {
+    // Do nothing
+  }
+
+  std::size_t charger_waypoint;
+  bool has_charger_waypoint;
 
   static rmf_task_sequence::Event::StandbyPtr standby(
     const rmf_task_sequence::Event::AssignIDPtr& id,
     const std::function<rmf_task::State()>& get_state,
     const rmf_task::ConstParametersPtr& parameters,
-    const GoToChargerDescription&,
+    const GoToChargerDescription& description,
     std::function<void()> update)
   {
     using GoToPlace = rmf_task_sequence::events::GoToPlace::Description;
     const auto state = get_state();
     const auto context = state.get<agv::GetContext>()->value;
 
+    // Get specified charger waypoint if available
+    const std::size_t charger_waypoint = description.has_charger_waypoint?
+      description.charger_waypoint: context->dedicated_charger_wp();
+
     return events::GoToPlace::Standby::make(
       id, get_state, parameters,
-      *GoToPlace::make(context->dedicated_charger_wp()),
+      *GoToPlace::make(charger_waypoint),
       std::move(update));
   }
 
@@ -159,10 +177,24 @@ struct ChargeBatteryEventDescription
 {
   ChargeBatteryEventDescription()
   : rmf_task_sequence::events::Placeholder::Description(
-      "Charge Battery", "")
+      "Charge Battery", ""),
+    charger_waypoint(0),
+    has_charger_waypoint(false)
   {
     // Do nothing
   }
+
+  ChargeBatteryEventDescription(const std::size_t charger_waypoint)
+  : rmf_task_sequence::events::Placeholder::Description(
+      "Charge Battery", ""),
+    charger_waypoint(charger_waypoint),
+    has_charger_waypoint(true)
+  {
+    // Do nothing
+  }
+
+  std::size_t charger_waypoint;
+  bool has_charger_waypoint;
 };
 
 //==============================================================================
@@ -182,10 +214,20 @@ void add_charge_battery(
     schemas::event_description__charge_battery);
 
   auto deserialize_charge_battery =
-    [](const nlohmann::json& msg)-> agv::DeserializedEvent
+    [place_deser = deserialization.place](const nlohmann::json& msg)
+    -> agv::DeserializedEvent
     {
-      std::shared_ptr<const rmf_task_sequence::Event::Description> desc =
-        std::make_shared<ChargeBatteryEventDescription>();
+      std::shared_ptr<const rmf_task_sequence::Event::Description> desc;
+      const auto charger_place_it = msg.find("charger_waypoint");
+      if (charger_place_it == msg.end())
+        desc = std::make_shared<ChargeBatteryEventDescription>();
+      // If an invalid place is given send it back to dedicated charger
+      else if (!place_deser(charger_place_it.value()).description.has_value())
+        desc = std::make_shared<ChargeBatteryEventDescription>();
+      else
+        desc = std::make_shared<ChargeBatteryEventDescription>(
+          place_deser(charger_place_it.value()).description.value().waypoint());
+
       agv::DeserializedEvent deserialized = {desc, {}};
       return deserialized;
     };
@@ -200,8 +242,16 @@ void add_charge_battery(
   GoToChargerDescription::add(*private_initializer);
 
   auto charge_battery_event_unfolder =
-    [](const ChargeBatteryEventDescription&)
+    [](const ChargeBatteryEventDescription& desc)
     {
+      // Set charger waypoint if available
+      if (desc.has_charger_waypoint)
+        return Bundle::Description({
+              std::make_shared<GoToChargerDescription>(
+                desc.charger_waypoint),
+              std::make_shared<WaitForChargeDescription>()
+            }, Bundle::Sequence, "Charge Battery");
+
       return Bundle::Description({
             std::make_shared<GoToChargerDescription>(),
             std::make_shared<WaitForChargeDescription>()
