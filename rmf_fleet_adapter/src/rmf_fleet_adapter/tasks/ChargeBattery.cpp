@@ -221,7 +221,6 @@ void add_charge_battery(
       const auto charger_place_it = msg.find("charger_waypoint");
       if (charger_place_it == msg.end())
         desc = std::make_shared<ChargeBatteryEventDescription>();
-      // If an invalid place is given send it back to dedicated charger
       else if (!place_deser(charger_place_it.value()).description.has_value())
         return {nullptr,
         std::move(place_deser(charger_place_it.value()).errors)};
