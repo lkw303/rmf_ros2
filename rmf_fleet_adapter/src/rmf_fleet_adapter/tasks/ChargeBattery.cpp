@@ -69,8 +69,8 @@ struct GoToChargerDescription
     const auto context = state.get<agv::GetContext>()->value;
 
     // Get specified charger waypoint if available
-    const std::size_t charger_waypoint = description.has_charger_waypoint?
-      description.charger_waypoint: context->dedicated_charger_wp();
+    const std::size_t charger_waypoint = description.has_charger_waypoint ?
+      description.charger_waypoint : context->dedicated_charger_wp();
 
     return events::GoToPlace::Standby::make(
       id, get_state, parameters,
@@ -224,7 +224,7 @@ void add_charge_battery(
       // If an invalid place is given send it back to dedicated charger
       else if (!place_deser(charger_place_it.value()).description.has_value())
         return {nullptr,
-          std::move(place_deser(charger_place_it.value()).errors)};
+        std::move(place_deser(charger_place_it.value()).errors)};
       else
         desc = std::make_shared<ChargeBatteryEventDescription>(
           place_deser(charger_place_it.value()).description.value().waypoint());
