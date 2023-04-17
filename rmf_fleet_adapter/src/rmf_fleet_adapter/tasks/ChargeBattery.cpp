@@ -223,7 +223,8 @@ void add_charge_battery(
         desc = std::make_shared<ChargeBatteryEventDescription>();
       // If an invalid place is given send it back to dedicated charger
       else if (!place_deser(charger_place_it.value()).description.has_value())
-        desc = std::make_shared<ChargeBatteryEventDescription>();
+        return {nullptr,
+          std::move(place_deser(charger_place_it.value()).errors)};
       else
         desc = std::make_shared<ChargeBatteryEventDescription>(
           place_deser(charger_place_it.value()).description.value().waypoint());
