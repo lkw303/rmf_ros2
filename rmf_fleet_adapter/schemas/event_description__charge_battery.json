@@ -5,6 +5,6 @@
     "description": "Charge Battery",
     "type": "object",
     "properties": {
-      "charging_point": {"type": "string"}
+      "charger_waypoint": {"type": "string"}
     }
   }
