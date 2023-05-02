@@ -30,6 +30,8 @@
 #include <rmf_task_sequence/Phase.hpp>
 #include <rmf_task_sequence/Event.hpp>
 
+#include "../agv/internal_FleetUpdateHandle.hpp"
+
 namespace rmf_fleet_adapter {
 namespace tasks {
 
@@ -43,6 +45,7 @@ std::shared_ptr<LegacyTask> make_charge_battery(
 
 //==============================================================================
 void add_charge_battery(
+  agv::TaskDeserialization& deserialization,
   rmf_task::Activator& task_activator,
   const rmf_task_sequence::Phase::ConstActivatorPtr& phase_activator,
   rmf_task_sequence::Event::Initializer& event_initializer,
