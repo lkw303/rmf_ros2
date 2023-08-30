@@ -558,6 +558,16 @@ void TaskManager::ActiveTask::publish_task_state(TaskManager& mgr)
   static const auto task_update_validator =
     mgr._make_validator(rmf_api_msgs::schemas::task_state_update);
   mgr._validate_and_publish_websocket(task_state_update, task_update_validator);
+  auto fleet_handle = mgr._fleet_handle.lock();
+
+  if (fleet_handle)
+  {
+    fleet_handle->publish_task_state(task_state_update);
+  } else {
+    RCLCPP_ERROR(
+      mgr._context->node()->get_logger(),
+      "Unable to publish task state");
+  }
 
   auto task_log_update = nlohmann::json();
   task_log_update["type"] = "task_log_update";

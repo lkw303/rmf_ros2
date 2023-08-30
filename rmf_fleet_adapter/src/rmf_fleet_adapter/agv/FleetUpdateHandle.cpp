@@ -1746,6 +1746,18 @@ void FleetUpdateHandle::Implementation::publish_lane_states() const
   }
   lane_states_pub->publish(std::move(msg));
 }
+
+//==============================================================================
+void FleetUpdateHandle::Implementation::publish_task_state(
+  const nlohmann::json & task_state) const
+{
+  if (lane_states_pub == nullptr)
+    return;
+  auto msg = std::make_unique<TaskStateMsg>();
+  msg->json_msg = task_state.dump();
+  task_state_pub->publish(std::move(msg));
+}
+
 //==============================================================================
 FleetUpdateHandle& FleetUpdateHandle::accept_task_requests(
   AcceptTaskRequest check)
@@ -1985,6 +1997,13 @@ FleetUpdateHandle& FleetUpdateHandle::fleet_state_update_period(
   }
 
   return *this;
+}
+
+//==============================================================================
+void FleetUpdateHandle::publish_task_state(
+  const nlohmann::json & task_state)
+{
+  _pimpl->publish_task_state(task_state);
 }
 
 //==============================================================================

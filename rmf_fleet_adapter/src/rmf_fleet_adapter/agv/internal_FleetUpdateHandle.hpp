@@ -318,6 +318,9 @@ public:
   using GraphMsg = rmf_building_map_msgs::msg::Graph;
   rclcpp::Publisher<GraphMsg>::SharedPtr nav_graph_pub = nullptr;
 
+  using TaskStateMsg = rmf_task_msgs::msg::ApiResponse;
+  rclcpp::Publisher<TaskStateMsg>::SharedPtr task_state_pub = nullptr;
+
   mutable rmf_task::Log::Reader log_reader = {};
 
   using LaneStates = rmf_fleet_msgs::msg::LaneStates;
@@ -398,6 +401,11 @@ public:
       handle->_pimpl->node->create_publisher<GraphMsg>(
       NavGraphTopicName, transient_qos);
     handle->_pimpl->publish_nav_graph();
+
+    // Publisher for task state
+    handle->_pimpl->task_state_pub =
+      handle->_pimpl->node->create_publisher<TaskStateMsg>(
+      TaskStatesTopicName, transient_qos);
 
     // Subscribe DockSummary
     handle->_pimpl->dock_summary_sub =
@@ -590,6 +598,8 @@ public:
 
   void update_fleet_state() const;
   void update_fleet_logs() const;
+
+  void publish_task_state(const nlohmann::json & task_state) const;
 
   nlohmann::json_schema::json_validator make_validator(
     const nlohmann::json& schema) const;
