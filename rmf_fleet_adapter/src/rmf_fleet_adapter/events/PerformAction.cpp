@@ -223,9 +223,9 @@ void PerformAction::Active::cancel()
 {
   _state->update_status(Status::Canceled);
   _state->update_log().info("Received signal to cancel");
-  _finished();
   if (auto data = _execution_data.lock())
     data->okay = false;
+  _finished();
 }
 
 //==============================================================================
@@ -233,9 +233,9 @@ void PerformAction::Active::kill()
 {
   _state->update_status(Status::Killed);
   _state->update_log().info("Received signal to kill");
-  _finished();
   if (auto data = _execution_data.lock())
     data->okay = false;
+  _finished();
 }
 
 //==============================================================================
