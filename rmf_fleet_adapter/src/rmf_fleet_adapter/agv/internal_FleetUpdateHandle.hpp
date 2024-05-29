@@ -599,7 +599,7 @@ public:
   void update_fleet_state() const;
   void update_fleet_logs() const;
 
-  void publish_task_state(const nlohmann::json & task_state) const;
+  void publish_task_state(const nlohmann::json& task_state) const;
 
   nlohmann::json_schema::json_validator make_validator(
     const nlohmann::json& schema) const;

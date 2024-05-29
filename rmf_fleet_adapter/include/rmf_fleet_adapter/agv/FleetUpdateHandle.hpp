@@ -361,7 +361,7 @@ public:
   FleetUpdateHandle& fleet_state_update_period(
     std::optional<rmf_traffic::Duration> value);
 
-  void publish_task_state(const nlohmann::json & task_state);
+  void publish_task_state(const nlohmann::json& task_state);
 
   /// Set a callback for listening to update messages (e.g. fleet states and
   /// task updates). This will not receive any update messages that happened

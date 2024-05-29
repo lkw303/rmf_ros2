@@ -171,6 +171,8 @@ public:
   /// performing any task
   const std::string* current_task_id() const;
 
+  std::string copy_current_task_id() const;
+
   /// Set the current task ID of the robot, or give a nullopt if a task is not
   /// being performed.
   RobotContext& current_task_id(std::optional<std::string> id);

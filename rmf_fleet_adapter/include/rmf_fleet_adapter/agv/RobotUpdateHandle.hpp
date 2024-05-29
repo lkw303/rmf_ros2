@@ -112,6 +112,8 @@ public:
   /// update the status. The default value is std::nullopt.
   void override_status(std::optional<std::string> status);
 
+  std::string current_task_id();
+
   /// Specify how high the delay of the current itinerary can become before it
   /// gets interrupted and replanned. A nullopt value will allow for an
   /// arbitrarily long delay to build up without being interrupted.

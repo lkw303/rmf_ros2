@@ -249,7 +249,9 @@ PYBIND11_MODULE(rmf_adapter, m) {
     py::arg("text"))
   .def("enable_responsive_wait",
     &agv::RobotUpdateHandle::enable_responsive_wait,
-    py::arg("value"));
+    py::arg("value"))
+  .def("current_task_id",
+   &agv::RobotUpdateHandle::current_task_id);
 
   // ACTION EXECUTOR   =======================================================
   auto m_robot_update_handle = m.def_submodule("robot_update_handle");

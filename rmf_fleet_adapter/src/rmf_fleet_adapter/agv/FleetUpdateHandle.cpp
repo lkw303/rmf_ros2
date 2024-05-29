@@ -1749,7 +1749,7 @@ void FleetUpdateHandle::Implementation::publish_lane_states() const
 
 //==============================================================================
 void FleetUpdateHandle::Implementation::publish_task_state(
-  const nlohmann::json & task_state) const
+  const nlohmann::json& task_state) const
 {
   if (lane_states_pub == nullptr)
     return;
@@ -2001,7 +2001,7 @@ FleetUpdateHandle& FleetUpdateHandle::fleet_state_update_period(
 
 //==============================================================================
 void FleetUpdateHandle::publish_task_state(
-  const nlohmann::json & task_state)
+  const nlohmann::json& task_state)
 {
   _pimpl->publish_task_state(task_state);
 }

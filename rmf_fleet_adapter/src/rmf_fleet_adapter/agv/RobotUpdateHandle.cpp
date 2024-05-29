@@ -289,6 +289,15 @@ void RobotUpdateHandle::override_status(std::optional<std::string> status)
   }
 }
 
+std::string RobotUpdateHandle::current_task_id()
+{
+  if (const auto context = _pimpl->get_context())
+  {
+    return context->copy_current_task_id();
+  }
+  return "";
+}
+
 //==============================================================================
 RobotUpdateHandle& RobotUpdateHandle::maximum_delay(
   rmf_utils::optional<rmf_traffic::Duration> value)

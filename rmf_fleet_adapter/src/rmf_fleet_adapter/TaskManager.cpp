@@ -563,7 +563,9 @@ void TaskManager::ActiveTask::publish_task_state(TaskManager& mgr)
   if (fleet_handle)
   {
     fleet_handle->publish_task_state(task_state_update);
-  } else {
+  }
+  else
+  {
     RCLCPP_ERROR(
       mgr._context->node()->get_logger(),
       "Unable to publish task state");

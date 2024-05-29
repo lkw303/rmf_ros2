@@ -290,6 +290,14 @@ const std::string* RobotContext::current_task_id() const
   return nullptr;
 }
 
+std::string RobotContext::copy_current_task_id() const
+{
+  if (_current_task_id.has_value())
+    return _current_task_id.value();
+
+  return {};
+}
+
 //==============================================================================
 RobotContext& RobotContext::current_task_id(std::optional<std::string> id)
 {
