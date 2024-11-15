@@ -1966,6 +1966,7 @@ void TaskManager::_consider_publishing_updates()
     _task_state_update_available = false;
     _last_update_time = now;
     _publish_task_state();
+    _publish_task_queue();
   }
 }
 
@@ -2017,6 +2018,21 @@ rmf_task::State TaskManager::_publish_pending_task(
     _make_validator(rmf_api_msgs::schemas::task_state_update);
 
   _validate_and_publish_websocket(task_state_update, validator);
+
+  auto fleet_handle = _fleet_handle.lock();
+  if (fleet_handle)
+  {
+    fleet_handle->publish_task_state(task_state_update);
+    RCLCPP_DEBUG(
+      context()->node()->get_logger(),
+      "Publishing task queue");
+  }
+  else
+  {
+    RCLCPP_ERROR(
+      context()->node()->get_logger(),
+      "Unable to publish task state");
+  }
 
   return pending.finish_state();
 }
